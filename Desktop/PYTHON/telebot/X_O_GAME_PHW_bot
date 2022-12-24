@@ -1,0 +1,47 @@
+
+from telegram.ext import Updater, CommandHandler, CallbackContext, MessageHandler, Filters
+from telegram import Update
+from config import TOKEN
+import TicTacToe3 as T3
+
+def game_ttt (update:Update, context:CallbackContext):
+    """Действия бота при получении команды на запуск игры 'game'
+    Результат: запуск игры крестики-нолики"""
+    after_command=context.args
+    update.message.reply_text(T3.play())
+    print(after_command)
+
+def catch_message (update:Update, context:CallbackContext):
+    """Действия бота при получении сообщения
+    Результат: вывод введенного сообщения"""
+    message=update.message.text
+    if 'прив' in message.lower():
+        update.message.reply_text(f'Рад с вами пообщаться')
+        return
+    update.message.reply_text(f'Вы ввели {message}')
+    print(message)
+
+def start(update:Update, context:CallbackContext):
+    """Действия бота при команде start
+    Результат: выводится сообщение-приветствие
+    bot.send_message` это метод Telegram API
+    update.effective_chat.id` - определяем `id` чата, 
+    откуда прилетело сообщение"""
+    message=update.message.text
+    context.bot.send_message(chat_id=update.effective_chat.id, 
+                            text='Это должен был быть бот игры в крестики-нолики! Игра идет, но только в консоли. Для запуска игры введите команду /game')
+
+updater=Updater(TOKEN)
+dispatcher=updater.dispatcher
+
+start_handler = CommandHandler('start', start)
+game_handler=CommandHandler('game', game_ttt)
+message_handler=MessageHandler(Filters.text, catch_message)
+
+dispatcher.add_handler(start_handler)
+dispatcher.add_handler (game_handler)
+dispatcher.add_handler (message_handler)
+
+print('Сервер запущен')
+updater.start_polling()
+updater.idle()
